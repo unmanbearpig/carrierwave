@@ -883,6 +883,25 @@ describe CarrierWave::ActiveRecord do
         expect(@event.images[1].current_path).to eq public_path('uploads/test.jpeg')
       end
 
+      it "should be able to add files with <<" do
+        @event[:images] = []
+        @event[:images] << 'old.jpeg'
+        expect(@event.images[0]).to be_an_instance_of(@uploader)
+        @event.save!
+        @event.reload
+
+        @event.images << 'test.jpeg'
+        # expect(@event.images[0]).to be_an_instance_of(@uploader)
+        # expect(@event.images[1]).to be_an_instance_of(@uploader)
+        @event.save!
+
+        expect(@event.images.count).to eq(2)
+        expect(@event.images[0]).to be_an_instance_of(@uploader)
+        expect(@event.images[1]).to be_an_instance_of(@uploader)
+        expect(@event.images[0].current_path).to eq public_path('uploads/old.jpeg')
+        expect(@event.images[1].current_path).to eq public_path('uploads/test.jpeg')
+      end
+
       it "should return valid JSON when to_json is called when images is nil" do
         expect(@event[:images]).to be_nil
         hash = JSON.parse(@event.to_json)
